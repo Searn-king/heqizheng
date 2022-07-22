@@ -97,7 +97,6 @@ class Calculation extends BaseController
             ->select();
         $data = $this->dealListToTree($data,'id','pid','child','id');
         $this->apiSuccess('success',$data);
-        return $data;
     }
 
     /**
