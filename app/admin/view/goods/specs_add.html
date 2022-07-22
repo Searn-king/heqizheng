@@ -1,0 +1,152 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<form class="layui-form p-4">
+	<h3 class="pb-3">盒型计价</h3>
+	<table class="layui-table layui-table-form">
+		<tr>
+			<td class="layui-td-gray">父级盒型<font>*</font>
+			</td>
+			<td>
+				<select name="pid" lay-verify="required" lay-reqText="请选择父级盒型">
+					<option value="0">作为顶级盒型计价</option>
+					{volist name=":set_recursion(get_goods_specs())" id="v"}
+					<option value="{$v.id}" {eq name="pid" value="$v.id" }selected="" {/eq}>{$v.title}</option>
+					{/volist}
+				</select>
+			</td>
+			<td class="layui-td-gray">盒型名称<font>*</font>
+			</td>
+			<td colspan="4">
+				<input type="text" name="title" lay-verify="required" autocomplete="off" placeholder="请输入盒型名称"
+					lay-reqText="请输入盒型名称" class="layui-input" {notempty name="$specs.title" }value="{$specs.title}"
+					{/notempty}>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">排序</td>
+			<td>
+				<input type="text" name="sort" placeholder="请输入排序，数字" value="0" autocomplete="off" class="layui-input"
+					{notempty name="$specs.sort" }value="{$specs.sort}" {/notempty}>
+			</td>
+			<td class="layui-td-gray">关键词</td>
+			<td colspan="4">
+				<input type="text" name="keywords" placeholder="请输入关键词，用“,”隔开，可空" autocomplete="off" class="layui-input"
+					{notempty name="$specs.keywords" }value="{$specs.keywords}" {/notempty}>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">描述</td>
+			<td colspan="4"><textarea name="desc" placeholder="请输入描述，可空"
+					class="layui-textarea">{notempty name="$specs.desc" }{$specs.desc}{/notempty}</textarea></td>
+
+			<td class="layui-td-gray">缩略图<font>*</font></td>
+			<td style="vertical-align:top">
+				<div class="layui-upload" style="text-align:center;">
+					<button type="button" class="layui-btn layui-btn-sm" id="uploadBtn">上传盒型图片</button>
+					<div class="layui-upload-list" id="demo1">
+						<img {notempty name="$thumb.filepath" }src="{$thumb.filepath}" {/notempty} width="100" style="width:200px;max-width:200px" />
+						<input type="hidden" name="thumb" value="" lay-verify="required" lay-reqText="请上传缩略图">
+					</div>
+				</div>
+			</td>
+		</tr>
+
+
+		<tr>
+			<td class="layui-td-gray">长</td>
+			<td>
+				<input type="text" name="long" placeholder="请输入长" autocomplete="off" class="layui-input"
+					   {notempty name="$specs.long" }value="{$specs.long}" {/notempty}>
+			</td>
+			<td class="layui-td-gray">宽</td>
+			<td>
+				<input type="text" name="wide" placeholder="请输入宽" autocomplete="off" class="layui-input"
+					   {notempty name="$specs.wide" }value="{$specs.wide}" {/notempty}>
+			</td>
+			<td class="layui-td-gray">高</td>
+			<td colspan="2">
+				<input type="text" name="high" placeholder="请输入高" autocomplete="off" class="layui-input"
+					   {notempty name="$specs.high" }value="{$specs.high}" {/notempty}>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">糊口</td>
+			<td>
+				<input type="text" name="life" placeholder="请输入糊口" autocomplete="off" class="layui-input"
+					   {notempty name="$specs.life" }value="{$specs.life}" {/notempty}>
+			</td>
+			<td class="layui-td-gray">上折</td>
+			<td>
+				<input type="text" name="fold_up" placeholder="请输入上折" autocomplete="off" class="layui-input"
+					   {notempty name="$specs.fold_up" }value="{$specs.fold_up}" {/notempty}>
+			</td>
+			<td class="layui-td-gray">下折</td>
+			<td colspan="2">
+				<input type="text" name="fold_down" placeholder="请输入下折" autocomplete="off" class="layui-input"
+					   {notempty name="$specs.fold_down" }value="{$specs.fold_down}" {/notempty}>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">拼距</td>
+			<td>
+				<input type="text" name="splicing_distance" placeholder="请输入拼距" autocomplete="off" class="layui-input"
+					   {notempty name="$specs.splicing_distance" }value="{$specs.splicing_distance}" {/notempty}>
+			</td>
+		</tr>
+		<tr>
+			<td class="layui-td-gray">计算公式</td>
+			<td colspan="7">
+				<textarea name="calculation" placeholder="请输入计算公式"
+									  class="layui-textarea">{notempty name="$specs.calculation" }{$specs.calculation}{/notempty}</textarea>
+			</td>
+		</tr>
+
+	</table>
+	<div class="py-3">
+		<input type="hidden" name="id" value="{$id}" />
+		<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">立即提交</button>
+		<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+	</div>
+</form>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	const moduleInit = ['tool'];
+	function gouguInit() {
+		var form = layui.form, tool = layui.tool, upload = layui.upload;
+		//监听提交
+		form.on('submit(webform)', function (data) {
+			let callback = function (e) {
+				layer.msg(e.msg);
+				if (e.code == 0) {
+					setTimeout(function () {
+						parent.location.reload();
+					}, 1000);
+				}
+			}
+			tool.post("/admin/goods/specs_add", data.field, callback);
+			return false;
+		});
+
+		//缩略图上传
+		var uploadInst = upload.render({
+			elem: '#uploadBtn'
+			, url: '/admin/api/upload'
+			, done: function (res) {
+				//如果上传失败
+				if (res.code == 1) {
+					return layer.msg('上传失败');
+				}
+				//上传成功
+				$('#demo1 input').attr('value', res.data.id);
+				$('#demo1 img').attr('src', res.data.filepath);
+			}
+		});
+	}
+</script>
+{/block}
+<!-- /脚本 -->

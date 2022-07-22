@@ -1,0 +1,128 @@
+{extend name="common/base"/}
+<!-- 主体 -->
+{block name="body"}
+<div class="p-3">
+	<form class="layui-form gg-form-bar border-t border-x">
+		<div class="layui-input-inline" style="width:300px;">
+			<input type="text" name="keywords" placeholder="ID/标题/描述" class="layui-input" autocomplete="off" />
+		</div>
+		<button class="layui-btn layui-btn-normal" lay-submit="" lay-filter="webform">提交搜索</button>
+	</form>
+	<table class="layui-hide" id="pages" lay-filter="pages"></table>
+</div>
+
+<script type="text/html" id="status">
+	<i class="layui-icon {{#  if(d.status == 1){ }}layui-icon-ok{{#  } else { }}layui-icon-close{{#  } }}"></i>
+</script>
+<script type="text/html" id="toolbarDemo">
+	<div class="layui-btn-container">
+    <span class="layui-btn layui-btn-normal layui-btn-sm tab-a" data-title="添加页面" data-href="/admin/pages/add">+ 添加页面</span>
+  </div>
+</script>
+<script type="text/html" id="barDemo">
+<div class="layui-btn-group"><a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a><a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a></div>
+</script>
+{/block}
+<!-- /主体 -->
+
+<!-- 脚本 -->
+{block name="script"}
+<script>
+	const moduleInit = ['tool'];
+	function gouguInit() {
+		var table = layui.table,tool = layui.tool, form = layui.form;
+		layui.pageTable = table.render({
+			elem: '#pages',
+			title: '单页面列表',
+			toolbar: '#toolbarDemo',
+			url: '/admin/pages/index', //数据接口
+			page: true, //开启分页
+			limit: 20,
+			cols: [
+				[ //表头
+					{
+						field: 'id',
+						title: '编号',
+						align: 'center',
+						width: 80
+					}, {
+						field: 'title',
+						title: '页面标题',
+						templet: '<div><a href="/home/pages/detail/id/{{d.id}}.html" class="layui-table-link" target="_blank">{{d.title}}</a></div>'
+					},{
+						field: 'name',
+						title: 'URL名称',
+						width: 100
+					},{
+						field: 'template',
+						title: '模板文件',
+						width: 100,
+						templet: function(d){
+							return d.template+'.html';
+						}
+					},{
+						field: 'create_time',
+						title: '发布时间',
+						align: 'center',
+						width: 160
+					},{
+						field: 'read',
+						align: 'center',
+						title: '阅读量',
+						width: 80
+					},{
+						field: 'status',
+						title: '状态',
+						toolbar: '#status',
+						align: 'center',
+						width: 66
+					},{
+						field: 'right',
+						title: '操作',
+						toolbar: '#barDemo',
+						width: 100,
+						align: 'center'
+					}
+				]
+			]
+		});
+
+		//监听行工具事件
+		table.on('tool(pages)', function(obj) {
+			var data = obj.data;
+			if (obj.event === 'edit') {
+				tool.tabAdd('/admin/pages/add?id='+obj.data.id,'编辑单页面'+obj.data.id);
+			}
+			else if (obj.event === 'del') {
+				layer.confirm('确定要删除吗?', {
+					icon: 3,
+					title: '提示'
+				}, function(index) {
+					let callback = function (e) {
+						layer.msg(e.msg);
+						if (e.code == 0) {
+							obj.del();
+						}
+					}
+					tool.delete("/admin/pages/delete", { id: data.id }, callback);
+					layer.close(index);
+				});
+			}
+		});
+
+		//监听搜索提交
+		form.on('submit(webform)', function(data) {
+			layui.pageTable.reload({
+				where: {
+					keywords: data.field.keywords
+				},
+				page: {
+					curr: 1
+				}
+			});
+			return false;
+		});
+	}
+</script>
+{/block}
+<!-- /脚本 -->
